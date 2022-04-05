@@ -133,5 +133,58 @@ codebook(q1,metadata_table = F,missingness_report = F)
 q1 <- pilot %>% select(starts_with(c("Q12"))) 
 codebook(q1,metadata_table = F,missingness_report = F)
 ```
+## Word Cloud from TF-IDF from first Open-Ended Question
+```{r}
+library(wordcloud)
+
+q1 <- pilot %>% select(starts_with(c("Q4.1"))) 
+library(tidytext)
+tidy_sherlock <- q1 %>%
+    mutate(line = row_number()) %>%
+    unnest_tokens(word, Q4.1) %>% 
+    filter(!word %in% stop_words$word)
+
+tfidf <- tidy_sherlock %>%
+    count(word, sort = TRUE)
+wordcloud(tfidf$word, tfidf$n, max.words=50, colors=brewer.pal(1, "Dark2"))
+
+
+```
+
+## Word Cloud from TF-IDF from second Open-Ended Question
+```{r}
+library(wordcloud)
+
+q1 <- pilot %>% select(starts_with(c("Q5.1"))) 
+library(tidytext)
+tidy_sherlock <- q1 %>%
+    mutate(line = row_number()) %>%
+    unnest_tokens(word, Q5.1) %>% 
+    filter(!word %in% stop_words$word)
+
+tfidf <- tidy_sherlock %>%
+    count(word, sort = TRUE)
+wordcloud(tfidf$word, tfidf$n, max.words=50, colors=brewer.pal(1, "Dark2"))
+
+
+```
+
+## Word Cloud from TF-IDF from third Open-Ended Question
+```{r}
+library(wordcloud)
+
+q1 <- pilot %>% select(starts_with(c("Q6.1"))) 
+library(tidytext)
+tidy_sherlock <- q1 %>%
+    mutate(line = row_number()) %>%
+    unnest_tokens(word, Q6.1) %>% 
+    filter(!word %in% stop_words$word)
+
+tfidf <- tidy_sherlock %>%
+    count(word, sort = TRUE)
+wordcloud(tfidf$word, tfidf$n, max.words=50, colors=brewer.pal(1, "Dark2"))
+
+
+```
 
 
