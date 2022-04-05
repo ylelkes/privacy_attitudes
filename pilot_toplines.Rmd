@@ -1,0 +1,137 @@
+---
+title: "Privacy Attitudes Pilot"
+author: "Yph Lelkes"
+date: "4/1/2022"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup,echo=F,warning=F,message=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = F,warning = F)
+library(pollster)
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(tidyverse)
+library(stringr)
+library(tidyverse)
+library(janitor)
+library(dataMaid)
+library(lubridate)
+library(codebook)
+
+pilot <- rio::import("pilot/pilot1_33122.sav")
+
+a <- ymd_hms(pilot$EndDate) - ymd_hms(pilot$StartDate)
+
+
+
+
+q1 <- pilot %>% select(IPAddress,starts_with("Q1.")) %>% pivot_longer(cols = 2:ncol(.)) %>%  mutate(name=str_replace(name,"Q1.2","Q1.1")) %>%  mutate(name=str_replace(name,"Q1.3","Q1.1"))
+q1 %>% na.omit() %>% pivot_wider(id_cols = IPAddress) -> block1
+fornames <- pilot %>% select(starts_with("Q1.1"))
+col_order <- colnames(fornames)
+block1 <- block1[, col_order]
+privacy <- sjlabelled::copy_labels(block1,fornames)
+
+
+### Privacy Blocl
+```
+
+## The survey took `r median(as.numeric(a)/60)` minutes on average
+
+
+
+## Privacy and Tradeoff Concerns
+```{r}
+codebook(privacy,metadata_table = F,missingness_report = F)
+
+```
+
+## Acceptable Uses of Personal Information
+```{r}
+
+q1 <- pilot %>% select(starts_with("Q2.")) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Knowledge Questions
+```{r}
+q1 <- pilot %>% select(starts_with("Q7.")) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Resignation Questions
+```{r}
+
+a <- select(pilot,starts_with(c("Q8","Q75","Q77"))) %>% pivot_longer(everything()) %>% slice(1:19) %>% select(name)
+b <- select(pilot,starts_with(c("Q8","Q75","Q77"))) %>% pivot_longer(everything()) %>% slice(20:38) %>% select(name)
+c <- select(pilot,starts_with(c("Q8","Q75","Q77"))) %>% pivot_longer(everything()) %>% slice(39:57) %>% select(name)
+recode_table <- data.frame(a,b,c)
+
+
+fornames <- select(pilot,starts_with(c("Q8")))
+q1 <- pilot %>% mutate(id=1:nrow(pilot)) %>% select(id,starts_with(c("Q8","Q75","Q77"))) %>% pivot_longer(cols = 2:ncol(.))
+
+recode_vec <- recode_table$name
+# named with old IDs
+names(recode_vec) <- recode_table$name.1
+
+q1 <- q1  %>% 
+  mutate(r1 = recode(name, !!!recode_vec))
+
+
+recode_vec <- recode_table$name
+# named with old IDs
+names(recode_vec) <- recode_table$name.2
+
+q1 <- q1  %>% 
+  mutate(name = recode(r1, !!!recode_vec))
+
+
+q2 <- q1 %>% select(-r1) %>% na.omit() %>%
+  group_by(name) %>%
+  mutate(row = row_number()) %>%
+  tidyr::pivot_wider(names_from = name, values_from = value) %>%
+  select(-row)
+
+col_order <- colnames(fornames)
+q2 <- q2[, col_order]
+privacy <- sjlabelled::copy_labels(q2,fornames)
+codebook(privacy,metadata_table = F,missingness_report = F)
+
+```
+
+## Supermarket Questions
+```{r}
+q1 <- pilot %>% select(starts_with("Q10.")) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Urgency Questions
+```{r}
+q1 <- pilot %>% select(starts_with("Q11.")) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Biometrics Questions
+```{r}
+q1 <- pilot %>% select(starts_with("Q9.")) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Privacy Protecting Behavior
+```{r}
+q1 <- pilot %>% select(starts_with(c("Q3.","Q4","Q5","Q6"))) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+## Drawing
+```{r}
+q1 <- pilot %>% select(starts_with(c("Q12"))) 
+codebook(q1,metadata_table = F,missingness_report = F)
+```
+
+
